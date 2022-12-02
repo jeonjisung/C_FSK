@@ -15,7 +15,9 @@ InterruptIn DIO2(PC_9);
 
 void fsk_init()
 {
+    // STAND-BY 모드 활성화를 위한 SLEEP 모드 활성화
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_SLEEP);
+    // 주파수는 한국 주파수에 초점을 둠.
     set_frequency(FRF);
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & RF_OPMODE_LONGRANGEMODE_MASK) | RF_OPMODE_LONGRANGEMODE_OFF);
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & 0xF7) | 0x00);
