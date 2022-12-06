@@ -4,7 +4,7 @@
 
 Serial pc(PA_9, PA_10);
 
-u8 message[] = "asdfsdfsfsd";
+u8 message[] = "b";
 
 int main()
 {
