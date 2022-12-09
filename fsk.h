@@ -31,8 +31,8 @@ void Send_rf(u8 *buffer, u8 size);
 void Recv_rf();
 bool Rx();
 void Tx();
-void DIO0_int();
-void DIO1_int();
-void DIO1_fall();
+void DIO0_up();
+void DIO1_up();
+void DIO1_down();
 
 #endif // !1

@@ -19,14 +19,14 @@ void fsk_init()
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_SLEEP);
     // 주파수는 한국 주파수에 초점을 둠.
     set_frequency(FRF);
-    // FSK모드 설정을 위해 LongRangeMode는 0x00으로 해준다.
+    // FSK모드 설정을 위해 OPMODE는 0x00(FSK모드 비트)으로 해준다.
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & RF_OPMODE_LONGRANGEMODE_MASK) | RF_OPMODE_LONGRANGEMODE_OFF);
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & 0xF7) | 0x00);
     // TX, RX 활성화를 위한 STANDBY 모드
     write_reg_single(REG_OPMODE, (read_reg_single(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_STANDBY);
-    // Payload Length 설정
+    // Payload Length 설정 // 0x80 | 0x20
     write_reg_single(REG_PAYLOADLENGTH, RX_BUFFER_SIZE);
-    write_reg_single(REG_FIFOTHRESH, 0x80 | 0x20);
+    write_reg_single(REG_FIFOTHRESH, 0x80 | 0x20);/////////////////////////////////////////////
     // PA output pin select
     write_reg_single(REG_PACONFIG, (read_reg_single(REG_PACONFIG) & RF_PACONFIG_PASELECT_MASK) | RF_PACONFIG_PASELECT_PABOOST);
     write_reg_single(REG_IRQFLAGS2, RF_IRQFLAGS2_FIFOOVERRUN);
@@ -77,7 +77,7 @@ void rx_config()
     write_reg_single(REG_AFCBW, (read_reg_single(REG_AFCBW) & RF_AFCBW_MANTAFC_MASK & RF_AFCBW_EXPAFC_MASK) | RF_AFCBW_MANTAFC_24 | RF_AFCBW_EXPAFC_2);
 
     // 패킷 형식은 가변길이 형식
-    write_reg_single(REG_PACKETCONFIG1, (read_reg_single(REG_PACKETCONFIG1) & RF_PACKETCONFIG1_PACKETFORMAT_MASK) | RF_PACKETCONFIG1_PACKETFORMAT_VARIABLE);
+    write_reg_single(REG_PACKETCONFIG1, (read_reg_single(REG_PACKETCONFIG1) & RF_PACKETCONFIG1_PACKETFORMAT_MASK) | );
     // 데이터 모드는 패킷 모드
     write_reg_single(REG_PACKETCONFIG2, (read_reg_single(REG_PACKETCONFIG2) | RF_PACKETCONFIG2_DATAMODE_PACKET));
 }
@@ -94,9 +94,9 @@ void Send_rf(u8 *buffer, u8 size)
     DIO1.enable_irq();
 
     //상승 에지가 발생할 때 해당 함수 호출
-    DIO0.rise(&DIO0_int);
+    DIO0.rise(&DIO0_up);
     //하강 에지가 발생할 때 해당 함수 호출
-    DIO1.fall(&DIO1_fall);
+    DIO1.fall(&DIO1_down);
 
     memcpy(tx_buf, buffer, size);
 
@@ -135,8 +135,8 @@ void Recv_rf()
     DIO0.enable_irq();
     DIO1.enable_irq();
 
-    DIO0.rise(&DIO0_int);
-    DIO1.rise(&DIO1_int);
+    DIO0.rise(&DIO0_up);
+    DIO1.rise(&DIO1_up);
 
     set_mode(RF_OPMODE_STANDBY);
     rxnbbyte = 0;
@@ -212,7 +212,7 @@ void Tx()
     }
 }
 
-void DIO0_int()
+void DIO0_up()
 {
     // TX Mode ~ing
     if (state == TX_RUNNING)
@@ -256,7 +256,7 @@ void DIO0_int()
     }
 }
 
-void DIO1_int()
+void DIO1_up()
 {
     if (state == RX_RUNNING)
     {
@@ -268,7 +268,7 @@ void DIO1_int()
     }
 }
 
-void DIO1_fall()
+void DIO1_down()
 {
     if (state == TX_RUNNING)
     {
